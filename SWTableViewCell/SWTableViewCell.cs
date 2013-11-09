@@ -70,6 +70,7 @@ namespace SWTableViewCell
 		PointF ScrollViewContentOffset {
 			get{return new PointF(ScrollLeftViewWidth, 0);}
 		}
+	
 
 		public SWTableViewCell (UITableViewCellStyle style, string reuseIdentifier, 
 		                        UITableView containingTable, IEnumerable<UIButton> rightUtilityButtons, 
@@ -85,9 +86,11 @@ namespace SWTableViewCell
 	
 
 			// Check if the UITableView will display Indices on the right. If that's the case, add a padding
-//		var indices = containingTableView.Source.SectionIndexTitles (containingTableView);
-//			additionalRightPadding = indices == null || indices.Length == 0 ? 0 : kSectionIndexWidth;
-
+			if(containingTableView.RespondsToSelector(new MonoTouch.ObjCRuntime.Selector("sectionIndexTitlesForTableView:")))
+			{
+				var indices = containingTableView.Source.SectionIndexTitles (containingTableView);
+				additionalRightPadding = indices == null || indices.Length == 0 ? 0 : SectionIndexWidth;
+			}
 
 			// Set up scroll view that will host our cell content
 			this.cellScrollView = new UIScrollView (new RectangleF (0, 0, Bounds.Width, height)); //TODO:frames
@@ -117,7 +120,6 @@ namespace SWTableViewCell
 
 			
 			// Add the cell scroll view to the cell 
-			//TODO: not sure what's going on here, why does this work?
 			var contentViewParent = Subviews[0];
 			foreach (var subView in contentViewParent.Subviews) {
 				this.scrollViewContentView.AddSubview (subView);
@@ -125,6 +127,10 @@ namespace SWTableViewCell
 			AddSubview (this.cellScrollView);
 		
 			HideSwipedContent (false);
+		}
+
+		public SWCellState State {
+			get{ return cellState; }
 		}
 
 		void OnScrollViewPressed(UITapGestureRecognizer tap)
@@ -135,11 +141,10 @@ namespace SWTableViewCell
 					this.containingTableView.Source.RowSelected (containingTableView, indexPath);
 				}
 				//Highlight hack
-				//TODO: I don't understand this
 				if (!this.Highlighted) {
 					this.scrollViewLeft.Hidden = true;
 					this.scrollViewButtonViewRight.Hidden = true;
-					NSTimer endHighLightTimer = NSTimer.CreateScheduledTimer (TimeSpan.FromMilliseconds (15), () => {
+					NSTimer endHighLightTimer = NSTimer.CreateScheduledTimer (TimeSpan.FromSeconds (0.15), () => {
 						if (this.Highlighted) {
 							this.scrollViewLeft.Hidden = false;
 							this.scrollViewButtonViewRight.Hidden = false;
@@ -361,7 +366,7 @@ namespace SWTableViewCell
 			button.BackgroundColor = color;
 			button.SetTitle (title, UIControlState.Normal);
 			button.SetTitleColor (UIColor.White, UIControlState.Normal);
-			list.Insert (0, button);
+			list.Add (button);
 		
 		}
 	}

@@ -10,13 +10,20 @@ namespace SWTableViewCell
 	{
 		public SWTableViewCellViewController () : base (UITableViewStyle.Grouped)
 		{
-			this.TableView.Source = new Source ();
+			this.TableView.Source = new Source (this);
 			this.TableView.AllowsSelection = false;
 			this.TableView.RowHeight = 70;
 			this.TableView.SeparatorInset = new UIEdgeInsets (0, 0, 0, 0);
 		}
 		class Source:UITableViewSource
 		{
+			SWTableViewCellViewController controller;
+
+			public Source (SWTableViewCellViewController controller)
+			{
+				this.controller = controller;
+				
+			}
 			#region implemented abstract members of UITableViewSource
 
 			public override int RowsInSection (UITableView tableview, int section)
@@ -34,7 +41,7 @@ namespace SWTableViewCell
 				var cell = tableView.DequeueReusableCell ("Cell") as SWTableViewCell;
 				if (cell == null) {
 					var leftView = new UILabel () {
-						Frame = new RectangleF (0, 0, 260, tableView.RowHeight),
+						Frame = new RectangleF (0, 0, SWTableViewCell.UtilityButtonsWidthMax, tableView.RowHeight),
 						BackgroundColor = UIColor.Red,
 						Text = "Peekaboo!",
 						TextColor = UIColor.White,
@@ -42,23 +49,49 @@ namespace SWTableViewCell
 					};
 
 					var buttons = new List<UIButton> ();
-					buttons.AddUtilityButton ("Edit", UIColor.Blue);
 					buttons.AddUtilityButton ("More", UIColor.LightGray);
-					
+					buttons.AddUtilityButton ("Edit", UIColor.Blue);
+				
 					cell = new SWTableViewCell (UITableViewCellStyle.Subtitle, "Cell", tableView, buttons, leftView);
-					cell.Scrolling += (sender, e) => Console.WriteLine("Scrolling {0}", e.CellState);
-					cell.UtilityButtonPressed += (sender, e) => Console.WriteLine("Button Pressed {0}", e.UtilityButtonIndex);
+					cell.Scrolling += OnScrolling;
+					cell.UtilityButtonPressed += OnButtonPressed;
 				}
-				cell.TextLabel.Text = "Test " + indexPath.Row;
+				cell.TextLabel.Text = "Item " + indexPath.Row;
+				cell.DetailTextLabel.Text = "Details " + indexPath.Row;
+
+				cell.HideSwipedContent (false);//reset cell state
 				return cell;
 			}
 
-			public override float GetHeightForRow (UITableView tableView, NSIndexPath indexPath)
+			#endregion
+
+			void OnScrolling (object sender, ScrollingEventArgs e)
 			{
-				return tableView.RowHeight;
+				//uncomment to close any other cells that are open when another cell is swiped
+				/*
+				if (e.CellState != SWCellState.Center) {
+					var paths = this.controller.TableView.IndexPathsForVisibleRows;
+					foreach (var path in paths) {
+						if(path.Equals(e.IndexPath))
+						   continue;
+						var cell = (SWTableViewCell)this.controller.TableView.CellAt (path);
+						if (cell.State != SWCellState.Center) {
+							cell.HideSwipedContent (true);
+						}
+					}
+				}
+				*/
 			}
 
-			#endregion
+			void OnButtonPressed (object sender, CellUtilityButtonClickedEventArgs e)
+			{
+				if (e.UtilityButtonIndex ==  1) {
+					new UIAlertView("Pressed", "You pressed the edit button!", null, null, new[] {"OK"}).Show();
+				}
+				else if(e.UtilityButtonIndex == 0){
+					new UIAlertView("Pressed", "You pressed the more button!", null, null, new[] {"OK"}).Show();
+				}
+			}
 
 
 
@@ -78,11 +111,7 @@ namespace SWTableViewCell
 			// Perform any additional setup after loading the view, typically from a nib.
 		}
 
-		public override bool ShouldAutorotateToInterfaceOrientation (UIInterfaceOrientation toInterfaceOrientation)
-		{
-			// Return true for supported orientations
-			return (toInterfaceOrientation != UIInterfaceOrientation.PortraitUpsideDown);
-		}
+	
 	}
 
 
