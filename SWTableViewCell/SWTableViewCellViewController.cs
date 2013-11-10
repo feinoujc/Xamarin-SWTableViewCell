@@ -38,7 +38,7 @@ namespace SWTableViewCell
 
 			public override UITableViewCell GetCell (UITableView tableView, NSIndexPath indexPath)
 			{
-				var cell = tableView.DequeueReusableCell ("Cell") as SWTableViewCell;
+				var cell = tableView.DequeueReusableCell ("C") as SWTableViewCell;
 				if (cell == null) {
 					var leftView = new UILabel () {
 						Frame = new RectangleF (0, 0, SWTableViewCell.UtilityButtonsWidthMax, tableView.RowHeight),
@@ -52,7 +52,7 @@ namespace SWTableViewCell
 					buttons.AddUtilityButton ("More", UIColor.LightGray);
 					buttons.AddUtilityButton ("Edit", UIColor.Blue);
 				
-					cell = new SWTableViewCell (UITableViewCellStyle.Subtitle, "Cell", tableView, buttons, leftView);
+					cell = new SWTableViewCell (UITableViewCellStyle.Subtitle, "C", tableView, buttons, leftView);
 					cell.Scrolling += OnScrolling;
 					cell.UtilityButtonPressed += OnButtonPressed;
 				}
@@ -60,6 +60,7 @@ namespace SWTableViewCell
 				cell.DetailTextLabel.Text = "Details " + indexPath.Row;
 
 				cell.HideSwipedContent (false);//reset cell state
+				cell.SetNeedsDisplay ();
 				return cell;
 			}
 

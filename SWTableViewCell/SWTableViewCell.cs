@@ -140,19 +140,6 @@ namespace SWTableViewCell
 					var indexPath = this.containingTableView.IndexPathForCell (this);
 					this.containingTableView.Source.RowSelected (containingTableView, indexPath);
 				}
-				//Highlight hack
-				if (!this.Highlighted) {
-					this.scrollViewLeft.Hidden = true;
-					this.scrollViewButtonViewRight.Hidden = true;
-					NSTimer endHighLightTimer = NSTimer.CreateScheduledTimer (TimeSpan.FromSeconds (0.15), () => {
-						if (this.Highlighted) {
-							this.scrollViewLeft.Hidden = false;
-							this.scrollViewButtonViewRight.Hidden = false;
-							Highlighted = false;
-						}
-					});
-					NSRunLoop.Current.AddTimer (endHighLightTimer, NSRunLoopMode.Common);
-				}
 			} else {
 				// Scroll back to center
 				this.HideSwipedContent (true);
