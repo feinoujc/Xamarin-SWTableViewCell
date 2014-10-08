@@ -119,8 +119,16 @@ namespace SWTableViewCell
 			this.cellScrollView.AddSubview (this.scrollViewContentView);
 
 			
-			// Add the cell scroll view to the cell 
-			var contentViewParent = Subviews[0];
+            UIView contentViewParent;
+            //deals with an internal change introduced in iOS 8
+            if (UIDevice.CurrentDevice.CheckSystemVersion(8, 0)){
+                contentViewParent = this;
+            }
+            else {
+                // Add the cell scroll view to the cell 
+                contentViewParent = Subviews[0];
+            }
+			
 			foreach (var subView in contentViewParent.Subviews) {
 				this.scrollViewContentView.AddSubview (subView);
 			}
